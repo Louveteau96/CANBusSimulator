@@ -1,4 +1,5 @@
 #include "can_bus.hpp"
+#include "can_logger.hpp"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -20,11 +21,14 @@ std::string getCurrentTimeStamp() {
 }
 
 int main() {
-    CANBus bus;
+	//Initialisation d'un logger
+	CANLogger logger("log/can_bus.log",LogLevel::DEBUG);
+	//Initialisation du CANBus
+    CANBus bus(logger);
     bus.start();
 
     // Thread emetteur
-    std::thread senderThread([&bus]() {
+    std::thread senderThread([&bus, &logger]() {
         for (int i = 0; i < 5; i++) {
             CANMessage msg;
             msg.id = 0x123;
@@ -36,18 +40,24 @@ int main() {
             std::lock_guard<std::mutex> lock(coutMutex);
             std::cout << "Sender: Message envoye (ID=0x" << std::hex << msg.id << std::dec << ")" << std::endl;
 
+			//Ajout au log
+			logger.info("Emetteur: Message envoyé (ID=0x" + std::to_string(msg.id) + ")");
+
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
     });
 
     // Thread recepteur
-    std::thread receiverThread([&bus]() {
+    std::thread receiverThread([&bus, &logger]() {
         for (int i = 0; i < 5; i++) {
             CANMessage msg = bus.receive();
 
             // Synchronisation de l'affichage
             std::lock_guard<std::mutex> lock(coutMutex);
             msg.print();
+
+			//Ajout au log
+			logger.info("Récepteur: Message reçu (ID=0x" + std::to_string(msg.id) + ")");
         }
     });
 
@@ -59,6 +69,9 @@ int main() {
 
     std::lock_guard<std::mutex> lock(coutMutex);
     std::cout << "Simulation terminee." << std::endl;
+
+	//Ajout au log
+	logger.info("Simulation terminée");
 
     return 0;
 }
