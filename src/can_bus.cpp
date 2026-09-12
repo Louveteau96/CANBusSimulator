@@ -1,10 +1,20 @@
 #include "can_bus.hpp"
+#include "can_logger.hpp"
 #include <iostream>
+
+//Constructeur
+CANBus::CANBus(CANLogger& logger) : logger(logger){};
 
 void CANBus::send(const CANMessage& msg) {
     std::lock_guard<std::mutex> lock(queueMutex);
+	//Envoi du message sur le CAN
     messageQueue.push(msg);
-    condVar.notify_one();   // Reveille un thread en attente
+	//Ajout au log
+	logger.debug ("Message envoyé - ID: 0x" + std::to_string(msg.id) +
+					", Data size : " + std::to_string(msg.data.size()));
+
+	// Reveille un thread en attente
+    condVar.notify_one();
 }
 
 CANMessage CANBus::receive() {
@@ -20,6 +30,9 @@ CANMessage CANBus::receive() {
 
     CANMessage msg = messageQueue.front();
     messageQueue.pop();
+
+	//Ajout au log
+	logger.debug("Message reçu - ID: 0x" + std::to_string(msg.id));
     return msg;
 }
 
