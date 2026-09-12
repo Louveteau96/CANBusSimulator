@@ -1,0 +1,5 @@
+# Dossier des objets de compilation
+bin/
+
+# Exécutables
+*.exe
