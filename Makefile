@@ -29,7 +29,7 @@ $(BIN_DIR):
 
 # Programme principal
 $(TARGET).exe: $(OBJS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -o $@ -lstdc++fs
 
 # Objets dans bin/
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BIN_DIR)
@@ -38,8 +38,8 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BIN_DIR)
 # ============================================================
 # Tests : compile TOUS les fichiers de test + unity.c
 # ============================================================
-$(TEST_TARGET).exe: $(TEST_OBJS) $(BIN_DIR)/can_bus.o $(BIN_DIR)/can_message.o | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $^ $(TEST_DIR)/unity.c -o $@
+$(TEST_TARGET).exe: $(TEST_OBJS) $(BIN_DIR)/can_bus.o $(BIN_DIR)/can_message.o $(BIN_DIR)/can_logger.o | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) $^ $(TEST_DIR)/unity.c -o $@ -lstdc++fs
 
 # Objets des tests dans bin/
 $(BIN_DIR)/%.o: $(TEST_DIR)/%.cpp | $(BIN_DIR)
@@ -52,5 +52,6 @@ clean:
 	-del /Q $(BIN_DIR)\*.o 2>nul
 	-rmdir $(BIN_DIR) 2>nul
 	-del /Q *.exe 2>nul
+	-rmdir /s /q log 2>nul
 
 .PHONY: all clean

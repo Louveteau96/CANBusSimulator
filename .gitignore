@@ -1,5 +1,6 @@
 # Dossier des objets de compilation
 bin/
+log/
 
 # Exécutables
 *.exe
